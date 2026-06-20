@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的個人音樂庫</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+            background-color: #f9f6f0;
+            color: #4a4a4a;
+            margin: 0;
+            padding: 20px;
+        }
+        .container { max-width: 700px; margin: 40px auto; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { color: #d97373; font-size: 36px; margin-bottom: 10px; }
+        .song-card {
+            background-color: #ffffff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+        .upload-section {
+            text-align: center;
+            margin-bottom: 30px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        .yt-input { padding: 12px; border-radius: 25px; border: 1px solid #ccc; width: 100%; max-width: 400px; font-size: 16px; outline: none; }
+        .yt-btn {
+            background-color: #5b9bd5; color: white; padding: 12px 20px;
+            border-radius: 25px; cursor: pointer; font-size: 16px; font-weight: bold; border: none;
+        }
+        .yt-thumbnail-container { position: relative; width: 100%; border-radius: 10px; overflow: hidden; margin-top: 10px; display: block; background-color: #000; }
+        .yt-thumbnail-container img { width: 100%; display: block; }
+        .play-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 60px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); pointer-events: none; }
+        #ytError { color: #d97373; font-size: 14px; margin-top: 10px; display: none; }
+        .admin-footer { text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px dashed #ccc; }
+        
+        .secret-btn { 
+            background: none; border: none; 
+            cursor: pointer; font-size: 32px; 
+            color: #FFD700;
+            text-shadow: 0 0 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .secret-btn:hover { transform: scale(1.2); }
+        
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal-content { background: #fff; width: 300px; margin: 20vh auto; padding: 25px; border-radius: 15px; text-align: center; }
+        .modal-input { padding: 10px; width: 80%; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎤 我的專屬音樂庫</h1>
+            <p>呢度儲存咗我平時錄低嘅歌，戴上耳機慢慢聽啦！</p>
+        </div>
+
+        <div class="upload-section" id="uploadSection" style="display: none; border: 2px dashed #d97373;">
+            <p style="margin: 0 0 10px 0; font-weight: bold; color: #d97373;">👑 管理員專區：永久加入 YouTube 影片</p>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 15px;">
+                <input type="text" id="ytInput" class="yt-input" placeholder="貼上 YouTube 連結">
+                <button id="ytAddBtn" class="yt-btn">▶️ 永久發佈</button>
+            </div>
+            <div id="ytError">❌ 輸入錯誤或寫入失敗，請檢查網絡權限！</div>
+        </div>
+
+        <div id="dynamicSongsContainer"></div>
+
+        <div class="admin-footer">
+            <button class="secret-btn" id="secretLoginBtn" title="管理員登入">🔑</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal-content">
+            <h3>管理員登入</h3>
+            <input type="password" id="adminPwd" class="modal-input" placeholder="密碼">
+            <div>
+                <button id="adminSubmitBtn" class="yt-btn" style="background-color:#d97373;">登入</button>
+                <button id="adminCancelBtn" class="yt-btn" style="background-color:#ccc; color:#333;">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+
+        let app = initializeApp(firebaseConfig);
+        let auth = getAuth(app);
+        let db = getFirestore(app);
+
+        // 初始化登入
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) { console.error("Firebase 登入初始化失敗", e); }
+        }
+        initAuth();
+
+        const dynamicSongsContainer = document.getElementById('dynamicSongsContainer');
+        
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const songsRef = collection(db, 'artifacts', appId, 'public', 'data', 'youtube_songs');
+                onSnapshot(songsRef, (snapshot) => {
+                    const songs = [];
+                    snapshot.forEach(doc => songs.push({ id: doc.id, ...doc.data() }));
+                    songs.sort((a, b) => b.timestamp - a.timestamp);
+                    
+                    dynamicSongsContainer.innerHTML = '';
+                    songs.forEach((song, index) => {
+                        const newCard = document.createElement('div');
+                        newCard.className = 'song-card';
+                        newCard.innerHTML = `
+                            <h2 class="song-title">✨ ${songs.length - index}. 影片分享</h2>
+                            <a href="https://www.youtube.com/watch?v=${song.videoId}" target="_blank" class="yt-thumbnail-container">
+                                <img src="https://img.youtube.com/vi/${song.videoId}/hqdefault.jpg">
+                                <div class="play-icon">▶️</div>
+                            </a>
+                        `;
+                        dynamicSongsContainer.appendChild(newCard);
+                    });
+                });
+            }
+        });
+
+        // 監聽器修復：使用明確的 addEventListener
+        document.getElementById('secretLoginBtn').addEventListener('click', () => {
+            console.log("嘗試開啟登入視窗...");
+            document.getElementById('adminModal').style.display = 'block';
+        });
+
+        document.getElementById('adminCancelBtn').addEventListener('click', () => {
+            document.getElementById('adminModal').style.display = 'none';
+        });
+
+        document.getElementById('adminSubmitBtn').addEventListener('click', () => {
+            const pwd = document.getElementById('adminPwd').value;
+            if(pwd === '8888') {
+                document.getElementById('adminModal').style.display = 'none';
+                document.getElementById('uploadSection').style.display = 'block';
+                document.getElementById('adminPwd').value = '';
+            } else {
+                alert("密碼錯誤，請重試！");
+                document.getElementById('adminPwd').value = '';
+            }
+        });
+
+        document.getElementById('ytAddBtn').addEventListener('click', async () => {
+            const url = document.getElementById('ytInput').value;
+            const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=))([^"&?\/ ]{11})/);
+            
+            if (match) {
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'youtube_songs'), {
+                        videoId: match[1],
+                        timestamp: Date.now()
+                    });
+                    document.getElementById('ytInput').value = '';
+                } catch (e) {
+                    console.error("發佈失敗:", e);
+                    document.getElementById('ytError').style.display = 'block';
+                }
+            } else {
+                document.getElementById('ytError').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
