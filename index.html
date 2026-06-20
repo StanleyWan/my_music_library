@@ -187,7 +187,8 @@
             console.log("DB instance:", db);
             if (match) {
                 try {
-                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'youtube_songs'), {
+                    //await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'youtube_songs'), {
+                    await addDoc(collection(db, 'youtube_songs'), {
                         videoId: match[1],
                         timestamp: Date.now()
                     });
