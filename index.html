@@ -183,7 +183,8 @@
         document.getElementById('ytAddBtn').addEventListener('click', async () => {
             const url = document.getElementById('ytInput').value;
             const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=))([^"&?\/ ]{11})/);
-            
+            console.log("AppID:", appId);
+            console.log("DB instance:", db);
             if (match) {
                 try {
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'youtube_songs'), {
