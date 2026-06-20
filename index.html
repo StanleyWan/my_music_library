@@ -135,7 +135,8 @@
         
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                const songsRef = collection(db, 'artifacts', appId, 'public', 'data', 'youtube_songs');
+                //const songsRef = collection(db, 'artifacts', appId, 'public', 'data', 'youtube_songs');
+                const songsRef = collection(db, 'youtube_songs');
                 onSnapshot(songsRef, (snapshot) => {
                     const songs = [];
                     snapshot.forEach(doc => songs.push({ id: doc.id, ...doc.data() }));
