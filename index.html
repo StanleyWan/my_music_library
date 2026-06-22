@@ -38,37 +38,44 @@
                 分類: "影片",           // 只能填寫：影片、照片、文件
                 標題: "2026年粵曲演唱片段", 
                 簡介: "在社區中心與好友的合唱錄影。",
-                網址: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" 
+                網址: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                圖片: "" // 影片唔需要填圖片
             },
             {
                 分類: "文件",
                 標題: "帝女花 - 工尺譜",
                 簡介: "這是我整理的樂譜，請點擊下載或查看。",
-                網址: "https://drive.google.com/drive/"
+                網址: "請在這裡貼上你的 Google Drive 檔案分享連結",
+                圖片: "" 
             },
             {
                 分類: "照片",
-                標題: "中秋節聯歡晚會相簿",
+                標題: "中秋節聯歡晚會",
                 簡介: "當晚的精彩活動花絮，大家笑得好開心！",
-                網址: "https://photos.google.com/"
+                網址: "請在這裡貼上你的 Google Photos 相簿連結", // 保留連結，方便睇完整相簿
+                // ⬇️ 重點喺呢度！將你 upload 咗嘅相片名填喺度 ⬇️
+                圖片: "./sample-photo.jpeg" 
             },
             {
                 分類: "影片",
                 標題: "太極拳晨運教學",
                 簡介: "每日早上的太極拳練習影片，適合在家跟著做。",
-                網址: "https://www.youtube.com/"
+                網址: "請在這裡貼上你的 YouTube 影片連結",
+                圖片: ""
             },
             {
                 分類: "文件",
                 標題: "長者中心活動時間表",
                 簡介: "本月份的所有活動時間及地點安排。",
-                網址: "https://drive.google.com/drive/"
+                網址: "請在這裡貼上你的 Google Drive 檔案分享連結",
+                圖片: ""
             },
             {
                 分類: "文件",
                 標題: "readtest.pdf",
                 簡介: "最新加入的 readtest.pdf 檔案。",
-                網址: "./readtest.pdf"
+                網址: "./readtest.pdf",
+                圖片: ""
             }
             // 💡 如果要新增，請把上面其中一段 { ... } 複製並貼到底下
         ];
@@ -132,6 +139,18 @@
             siteData.forEach((item) => {
                 const style = getTypeStyle(item.分類);
                 
+                // 判斷有冇上載圖片，如果有就產生圖片嘅 HTML
+                let imageHTML = '';
+                if (item.圖片 && item.圖片 !== "") {
+                    // 使用 onerror 來防止圖片找不到時出現破圖圖示，改為顯示灰色佔位圖
+                    imageHTML = `
+                        <div class="mb-4 overflow-hidden rounded-xl h-48 bg-gray-200 flex items-center justify-center relative">
+                            <img src="${item.圖片}" alt="${item.標題}" class="object-cover w-full h-full absolute inset-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <span class="text-gray-400 hidden">圖片載入中或找不到圖片：${item.圖片}</span>
+                        </div>
+                    `;
+                }
+
                 // 建立卡片 HTML
                 const cardHTML = `
                     <div class="card-item bg-white rounded-2xl p-6 shadow-md border border-gray-100 card-hover flex flex-col h-full" data-category="${item.分類}">
@@ -141,9 +160,13 @@
                             </div>
                             <h2 class="text-2xl font-bold text-gray-800 line-clamp-2">${item.標題}</h2>
                         </div>
+                        
+                        <!-- 插入圖片顯示區域 -->
+                        ${imageHTML}
+
                         <p class="text-gray-600 text-lg mb-6 flex-grow">${item.簡介}</p>
                         <a href="${item.網址}" target="_blank" rel="noopener noreferrer" 
-                           class="w-full block text-center ${style.btn} text-white font-bold py-3 px-4 rounded-xl text-xl transition shadow-sm">
+                           class="w-full block text-center ${style.btn} text-white font-bold py-3 px-4 rounded-xl text-xl transition shadow-sm mt-auto">
                             前往觀看
                         </a>
                     </div>
@@ -177,10 +200,6 @@
 
         // 網頁載入時執行
         renderCards();
-    </script>
-</body>
-</html>
-        });
     </script>
 </body>
 </html>
