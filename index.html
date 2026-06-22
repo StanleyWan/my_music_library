@@ -4,122 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的雲端資源庫</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f4f6f8; color: #333333; }
-        .card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
-        .hidden-item { display: none; }
-    </style>
-</head>
-<body class="p-4 md:p-8">
-
-    <script>
-        const siteData = [
-            {
-                分類: "影片",
-                標題: "2026年粵曲演唱片段", 
-                簡介: "在社區中心與好友的合唱錄影。",
-                網址: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                圖片: ""
-            },
-            {
-                分類: "文件",
-                標題: "帝女花 - 工尺譜",
-                簡介: "這是我整理的樂譜，請點擊下載或查看。",
-                網址: "請在這裡貼上你的 Google Drive 檔案分享連結",
-                圖片: "" 
-            },
-            {
-                分類: "照片",
-                標題: "中秋節聯歡晚會",
-                簡介: "當晚的精彩活動花絮，大家笑得好開心！",
-                網址: "./sample-photo.jpeg",
-                圖片: "./sample-photo.jpeg" 
-            },
-            {
-                分類: "影片",
-                標題: "太極拳晨運教學",
-                簡介: "每日早上的太極拳練習影片，適合在家跟著做。",
-                網址: "請在這裡貼上你的 YouTube 影片連結",
-                圖片: ""
-            },
-            {
-                分類: "文件",
-                標題: "readtest.pdf",
-                簡介: "最新加入的 readtest.pdf 檔案。",
-                網址: "./readtest.pdf",
-                圖片: ""
-            }
-        ];
-    </script>
-
-    <div class="max-w-5xl mx-auto">
-        <header class="text-center mb-10 mt-6">
-            <h1 class="text-4xl md:text-5xl font-bold text-blue-800 mb-4">📚 我的雲端資源庫</h1>
-        </header>
-
-        <div class="flex flex-wrap justify-center gap-3 mb-10">
-            <button onclick="filterContent('全部')" class="filter-btn active bg-blue-600 text-white px-6 py-3 rounded-full text-xl font-bold shadow-md">🌟 全部</button>
-            <button onclick="filterContent('影片')" class="filter-btn bg-white text-gray-700 border-2 border-gray-200 px-6 py-3 rounded-full text-xl font-bold shadow-sm">🎥 影片</button>
-            <button onclick="filterContent('照片')" class="filter-btn bg-white text-gray-700 border-2 border-gray-200 px-6 py-3 rounded-full text-xl font-bold shadow-sm">🖼️ 照片</button>
-            <button onclick="filterContent('文件')" class="filter-btn bg-white text-gray-700 border-2 border-gray-200 px-6 py-3 rounded-full text-xl font-bold shadow-sm">📄 文件</button>
-        </div>
-
-        <div id="contentGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-    </div>
-
-    <script>
-        const contentGrid = document.getElementById('contentGrid');
-
-        function getTypeStyle(type) {
-            switch(type) {
-                case '影片': return { icon: '🎥', bg: 'bg-red-50', btn: 'bg-red-500 hover:bg-red-600' };
-                case '照片': return { icon: '🖼️', bg: 'bg-green-50', btn: 'bg-green-500 hover:bg-green-600' };
-                case '文件': return { icon: '📄', bg: 'bg-blue-50', btn: 'bg-blue-500 hover:bg-blue-600' };
-                default: return { icon: '🔗', bg: 'bg-gray-50', btn: 'bg-gray-500 hover:bg-gray-600' };
-            }
-        }
-
-        function renderCards() {
-            contentGrid.innerHTML = '';
-            siteData.forEach((item) => {
-                const style = getTypeStyle(item.分類);
-                let imageHTML = item.圖片 ? `<div class="mb-4 overflow-hidden rounded-xl h-48 bg-gray-200"><img src="${item.圖片}" class="object-cover w-full h-full"></div>` : '';
-                
-                const isFile = item.網址.toLowerCase().endsWith('.pdf') || item.網址.toLowerCase().endsWith('.docx');
-                let buttonHTML = isFile ? `
-                    <div class="flex gap-2 mt-auto">
-                        <a href="${item.網址}" target="_blank" class="w-1/2 block text-center bg-white border-2 border-gray-300 font-bold py-3 rounded-xl text-lg hover:bg-gray-100">👀 閱讀</a>
-                        <a href="${item.網址}" download class="w-1/2 block text-center ${style.btn} text-white font-bold py-3 rounded-xl text-lg">⬇️ 下載</a>
-                    </div>` : `
-                    <a href="${item.網址}" target="_blank" class="w-full block text-center ${style.btn} text-white font-bold py-3 rounded-xl text-xl mt-auto">前往觀看</a>`;
-
-                contentGrid.innerHTML += `
-                    <div class="card-item bg-white rounded-2xl p-6 shadow-md border border-gray-100 card-hover flex flex-col h-full" data-category="${item.分類}">
-                        <div class="flex items-center mb-4"><div class="${style.bg} p-3 rounded-full mr-4 text-2xl">${style.icon}</div>
-                        <h2 class="text-2xl font-bold text-gray-800 line-clamp-2">${item.標題}</h2></div>
-                        ${imageHTML}
-                        <p class="text-gray-600 text-lg mb-6 flex-grow">${item.簡介}</p>
-                        ${buttonHTML}
-                    </div>`;
-            });
-        }
-
-        function filterContent(category) {
-            document.querySelectorAll('.card-item').forEach(card => {
-                card.classList.toggle('hidden-item', category !== '全部' && card.dataset.category !== category);
-            });
-        }
-        renderCards();
-    </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="zh-HK">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的雲端資源庫</title>
     <!-- 引入 Tailwind CSS 以實現美觀的排版 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -128,6 +12,7 @@
             font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
             background-color: #f4f6f8;
             color: #333333;
+            margin: 0; /* 移除預設邊距，讓大圖片可以貼邊 */
         }
         .card-hover {
             transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -140,9 +25,14 @@
         .hidden-item {
             display: none;
         }
+        /* 金句專用字體 */
+        .quote-text {
+            font-family: "楷體", "Kaiti", "DFKai-SB", serif;
+            text-shadow: 2px 4px 6px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="pb-8">
 
     <!-- ======================================================= -->
     <!-- ⬇️⬇️⬇️ 管理員修改區：請在這裡新增或修改你的檔案資料 ⬇️⬇️⬇️ -->
@@ -200,13 +90,33 @@
     <!-- ⬆️⬆️⬆️ 管理員修改區結束 (以下為網頁設計代碼，無需修改) ⬆️⬆️⬆️ -->
     <!-- ======================================================= -->
 
-    <div class="max-w-5xl mx-auto">
-        <!-- 網站標題區 -->
-        <header class="text-center mb-10 mt-6">
-            <h1 class="text-4xl md:text-5xl font-bold text-blue-800 mb-4">📚 我的雲端資源庫</h1>
-            <p class="text-xl text-gray-600">點擊下方的分類或卡片，輕鬆瀏覽影片、相簿與文件。</p>
-        </header>
+    <!-- 🌟 全新設計：上半頁大圖與金句 (Hero Section) 🌟 -->
+    <div class="relative w-full h-[50vh] min-h-[400px] flex items-center justify-center bg-gray-800 mb-10 shadow-xl overflow-hidden">
+        <!-- 背景大圖 (你可以隨時替換 src 裡面的網址來換相) -->
+        <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&q=80&w=2000" 
+             alt="忘憂谷風景" 
+             class="absolute inset-0 w-full h-full object-cover opacity-70">
+        
+        <!-- 金句文字 -->
+        <div class="relative z-10 text-center px-4 w-full">
+            <h1 class="quote-text text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
+                忘憂谷內應忘憂<br class="md:hidden">
+                <span class="hidden md:inline">，</span>多添快樂少添愁
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-200 mt-6 drop-shadow-md tracking-widest">
+                歡迎來到你的專屬雲端資源庫
+            </p>
+        </div>
+        
+        <!-- 提示向下的動態箭嘴 -->
+        <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <span class="text-white text-3xl opacity-80">👇</span>
+        </div>
+    </div>
 
+    <!-- 下半頁：功能與資源區 -->
+    <div class="max-w-5xl mx-auto px-4 md:px-8">
+        
         <!-- 分類按鈕區 (導航列) -->
         <div class="flex flex-wrap justify-center gap-3 mb-10">
             <button onclick="filterContent('全部')" class="filter-btn active bg-blue-600 text-white px-6 py-3 rounded-full text-xl font-bold shadow-md hover:bg-blue-700 transition">
@@ -229,7 +139,7 @@
         </div>
 
         <!-- 頁尾 -->
-        <footer class="text-center mt-16 mb-8 text-gray-500 text-lg">
+        <footer class="text-center mt-16 mb-4 text-gray-500 text-lg">
             <p>本網站內容均連結至 Google Drive / Google Photos / YouTube</p>
         </footer>
     </div>
@@ -267,6 +177,32 @@
                     `;
                 }
 
+                // 🌟 加入全新智能雙按鈕邏輯 🌟
+                const isFile = item.網址.toLowerCase().endsWith('.pdf') || item.網址.toLowerCase().endsWith('.docx');
+                let buttonHTML = '';
+                
+                if (isFile) {
+                    buttonHTML = `
+                        <div class="flex gap-3 mt-auto">
+                            <a href="${item.網址}" target="_blank" rel="noopener noreferrer" 
+                               class="w-1/2 block text-center bg-white text-gray-700 border-2 border-gray-300 font-bold py-3 px-2 rounded-xl text-lg transition shadow-sm hover:bg-gray-100 hover:border-gray-400">
+                                👀 網上閱讀
+                            </a>
+                            <a href="${item.網址}" download
+                               class="w-1/2 block text-center ${style.btn} text-white font-bold py-3 px-2 rounded-xl text-lg transition shadow-sm">
+                                ⬇️ 下載檔案
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    buttonHTML = `
+                        <a href="${item.網址}" target="_blank" rel="noopener noreferrer" 
+                           class="w-full block text-center ${style.btn} text-white font-bold py-3 px-4 rounded-xl text-xl transition shadow-sm mt-auto">
+                            前往觀看
+                        </a>
+                    `;
+                }
+
                 // 建立卡片 HTML
                 const cardHTML = `
                     <div class="card-item bg-white rounded-2xl p-6 shadow-md border border-gray-100 card-hover flex flex-col h-full" data-category="${item.分類}">
@@ -281,10 +217,9 @@
                         ${imageHTML}
 
                         <p class="text-gray-600 text-lg mb-6 flex-grow">${item.簡介}</p>
-                        <a href="${item.網址}" target="_blank" rel="noopener noreferrer" 
-                           class="w-full block text-center ${style.btn} text-white font-bold py-3 px-4 rounded-xl text-xl transition shadow-sm mt-auto">
-                            前往觀看
-                        </a>
+                        
+                        <!-- 插入按鈕 -->
+                        ${buttonHTML}
                     </div>
                 `;
                 contentGrid.innerHTML += cardHTML;
